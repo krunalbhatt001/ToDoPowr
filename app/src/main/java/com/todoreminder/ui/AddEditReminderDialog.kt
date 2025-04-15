@@ -15,6 +15,15 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * A DialogFragment for adding or editing a reminder.
+ *
+ * This dialog allows the user to enter a title, description, date/time, and recurrence interval
+ * for a reminder. If an existing reminder is passed, it populates the UI with its data.
+ *
+ * @param onSave Callback invoked when the Save button is pressed with the [ReminderEntity] as a result.
+ * @param existingReminder Optional reminder to be edited. If null, a new reminder is created.
+ */
 class AddEditReminderDialog(
     private val onSave: (ReminderEntity) -> Unit,
     private val existingReminder: ReminderEntity? = null
@@ -26,6 +35,9 @@ class AddEditReminderDialog(
     private var selectedDateTime: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
 
+    /**
+     * Creates and returns the dialog UI.
+     */
     @SuppressLint("UseGetLayoutInflater")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = DialogAddEditReminderBinding.inflate(LayoutInflater.from(context))
@@ -37,25 +49,23 @@ class AddEditReminderDialog(
         setupRecurrenceSpinner()
         setupDateTimePicker()
 
+        // Pre-fill data if editing existing reminder
         existingReminder?.let {
             binding.titleInput.setText(it.title)
             binding.descInput.setText(it.description)
             selectedDateTime.timeInMillis = it.dateTime
             binding.selectedDateTimeText.text = dateFormat.format(selectedDateTime.time)
-            when {
-                it.isRecurring -> {
-                    val position = when (it.recurrenceInterval) {
-                        1L -> 1  // Every 1 Minute
-                        60L -> 2 // Hourly
-                        1440L -> 3 // Daily
-                        else -> 0 // None
-                    }
 
-                    binding.recurrenceSpinner.setSelection(position)
-                }
+            val position = when (it.recurrenceInterval) {
+                1L -> 1  // Every 1 Minute
+                60L -> 2 // Hourly
+                1440L -> 3 // Daily
+                else -> 0 // None
             }
+            binding.recurrenceSpinner.setSelection(position)
         }
 
+        // Save button action
         binding.saveButton.setOnClickListener {
             val title = binding.titleInput.text.toString().trim()
             val desc = binding.descInput.text.toString().trim()
@@ -90,6 +100,10 @@ class AddEditReminderDialog(
         return dialog
     }
 
+    /**
+     * Sets up the date and time picker dialog.
+     * Opens a DatePickerDialog first and then a TimePickerDialog.
+     */
     private fun setupDateTimePicker() {
         binding.dateTimeButton.setOnClickListener {
             val now = selectedDateTime
@@ -108,22 +122,31 @@ class AddEditReminderDialog(
         }
     }
 
+    /**
+     * Initializes the recurrence interval dropdown spinner with options like None, Hourly, etc.
+     */
     private fun setupRecurrenceSpinner() {
         val options = listOf("None", "Every 1 Minute", "Hourly", "Daily")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.recurrenceSpinner.adapter = adapter
 
-
+        // Select existing recurrence if editing
         val selected = when (existingReminder?.recurrenceInterval) {
-            1L -> 1  // Every 1 Minute
-            60L -> 2 // Hourly
-            1440L -> 3 // Daily
-            else -> 0 // None
+            1L -> 1
+            60L -> 2
+            1440L -> 3
+            else -> 0
         }
         binding.recurrenceSpinner.setSelection(selected)
     }
 
+    /**
+     * Converts the selected spinner option to a recurrence interval in minutes.
+     *
+     * @param option The selected recurrence option from the spinner.
+     * @return The corresponding interval in minutes.
+     */
     private fun calculateRecurrenceInterval(option: String): Long {
         return when (option) {
             "Every 1 Minute" -> 1L
@@ -133,9 +156,11 @@ class AddEditReminderDialog(
         }
     }
 
+    /**
+     * Cleans up view binding when the view is destroyed.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
-

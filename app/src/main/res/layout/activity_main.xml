@@ -34,13 +34,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvHeading"
         tools:listitem="@layout/item_reminder" />
-
+    <ProgressBar
+        android:layout_marginEnd="18dp"
+        android:id="@+id/progressbar"
+        app:layout_constraintTop_toTopOf="@id/tvHeading"
+        app:layout_constraintBottom_toBottomOf="@id/tvHeading"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="wrap_content"
+        android:progressTint="@color/fab_red"
+        android:layout_height="wrap_content"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
+        android:importantForAccessibility="no"
         app:backgroundTint="@color/fab_red"
         android:src="@drawable/ic_add_reminder"
         app:tint="@color/white"
